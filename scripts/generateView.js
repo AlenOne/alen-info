@@ -7,8 +7,9 @@ const log = message => console.log(chalk.green(`${message}`))
 const successLog = message => console.log(chalk.blue(`${message}`))
 const errorLog = error => console.log(chalk.red(`${error}`))
 const { vueTemplate } = require('./template')
+const { createRouter } = require('./generateRouter')
 
-const generateFile = (path, data) => {
+const generateFile = (path, data, componentName) => {
   if (fs.existsSync(path)) {
     errorLog(`${path}文件已存在`)
     return
@@ -19,7 +20,10 @@ const generateFile = (path, data) => {
         errorLog(err.message)
         reject(err)
       } else {
-        resolve(true)
+        createRouter(componentName,path).then(() => {
+          resolve(true)
+        })
+        
       }
     })
   })
@@ -57,7 +61,7 @@ process.stdin.on('data', async chunk => {
       componentName = inputName
     }
     log(`正在生成 vue 文件 ${componentVueName}`)
-    await generateFile(componentVueName, vueTemplate(componentName))
+    await generateFile(componentVueName, vueTemplate(componentName),componentName)
     successLog('生成成功')
   } catch (e) {
     errorLog(e.message)
